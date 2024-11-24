@@ -1,0 +1,248 @@
+const express = require('express');
+const Web3 = require('web3').default;
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+
+const web3 = new Web3('http://localhost:8545');
+const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "date",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "mechanic",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "addRecord",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "owner",
+				"type": "string"
+			}
+		],
+		"name": "addVehicle",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "date",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "mechanic",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "RecordAdded",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			}
+		],
+		"name": "getReconciliation",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalCost",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			}
+		],
+		"name": "getRecords",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "date",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "mechanic",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cost",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct VehicleMaintenance.Maintenance[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			}
+		],
+		"name": "getVehicleOwner",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+const contractAddress = '0x9a2E12340354d2532b4247da3704D2A5d73Bd189'; 
+const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+app.use(express.static('frontend'));
+app.use(express.json());
+
+app.post('/addVehicle', async (req, res) => {
+    const { vin, owner } = req.body;
+    const accounts = await web3.eth.getAccounts();
+    
+    try {
+        await contract.methods.addVehicle(vin, owner).send({ from: accounts[0] });
+        res.status(200).send('Vehicle added successfully');
+    } catch (error) {
+        console.error(error); 
+        res.status(500).send('Error adding vehicle');
+    }
+});
+
+app.post('/addRecord', async (req, res) => {
+    const { vin, description, date, mechanic, cost } = req.body;
+    const accounts = await web3.eth.getAccounts();
+    
+    try {
+        await contract.methods.addRecord(vin, description, date, mechanic, cost).send({ from: accounts[0] });
+        res.status(200).send('Record added successfully');
+    } catch (error) {
+        console.error(error); 
+        res.status(500).send('Error adding record');
+    }
+});
+
+app.get('/getRecords/:vin', async (req, res) => {
+    const { vin } = req.params;
+    
+    try {
+        const records = await contract.methods.getRecords(vin).call();
+        res.status(200).json(records);
+    } catch (error) {
+        console.error(error); 
+        res.status(500).send('Error retrieving records');
+    }
+});
+
+app.get('/getOwner/:vin', async (req, res) => {
+    const { vin } = req.params;
+
+    try {
+        const owner = await contract.methods.getVehicleOwner(vin).call();
+        res.status(200).json({ owner });
+    } catch (error) {
+        console.error(error); 
+        res.status(500).send('Error retrieving owner');
+    }
+});
+
+app.get('/getReconciliation/:vin', async (req, res) => {
+    const { vin } = req.params;
+
+    try {
+        const totalCost = await contract.methods.getReconciliation(vin).call();
+        res.status(200).json({ totalCost });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error retrieving reconciliation');
+    }
+});
+
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
+});
