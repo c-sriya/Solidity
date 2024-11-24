@@ -1,0 +1,59 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract VehicleMaintenance {
+
+    struct Maintenance {
+        string description;
+        uint256 date;
+        string mechanic;
+        uint256 cost;
+    }
+
+    struct Vehicle {
+        string vin; 
+        string owner;
+    }
+
+    struct MaintenanceRecords {
+        string vin;
+        Maintenance[] records;
+    }
+
+    mapping(string => Vehicle) private vehicles; 
+    mapping(string => MaintenanceRecords) private maintenanceRecords; 
+
+    event RecordAdded(string vin, string description, uint256 date, string mechanic, uint256 cost);
+
+    function addVehicle(string memory vin, string memory owner) public {
+        require(bytes(vehicles[vin].vin).length == 0, "Vehicle already exists");
+        vehicles[vin] = Vehicle(vin, owner);
+
+    }
+
+    function addRecord(string memory vin, string memory description, uint256 date, string memory mechanic, uint256 cost) public {
+        require(bytes(vehicles[vin].vin).length != 0, "Vehicle does not exist");
+        
+        maintenanceRecords[vin].records.push(Maintenance(description, date, mechanic, cost));
+        emit RecordAdded(vin, description, date, mechanic, cost);
+    }
+
+    function getRecords(string memory vin) public view returns (Maintenance[] memory) {
+        require(bytes(vehicles[vin].vin).length != 0, "Vehicle does not exist");
+        return maintenanceRecords[vin].records; 
+    }
+
+    function getVehicleOwner(string memory vin) public view returns (string memory) {
+        require(bytes(vehicles[vin].vin).length != 0, "Vehicle does not exist");
+        return vehicles[vin].owner; 
+    }
+
+    function getReconciliation(string memory vin) public view returns (uint256 totalCost) {
+        require(bytes(vehicles[vin].vin).length != 0, "Vehicle does not exist");
+        Maintenance[] memory records = maintenanceRecords[vin].records;
+        for (uint i = 0; i < records.length; i++) {
+            totalCost += records[i].cost;
+        }
+        return totalCost;        
+    }
+}
