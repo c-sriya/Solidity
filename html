@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Maintenance Blockchain</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Vehicle Maintenance Records</h1>
+  </header>
+  <main>
+    <div class="flex-container">
+      
+      <!-- Add Vehicle -->
+      <div class="flex-item">
+        <h2>Add Vehicle</h2>
+        <input type="text" id="vin" placeholder="Vehicle VIN">
+        <input type="text" id="owner" placeholder="Owner Name">
+        <button onclick="addVehicle()">Submit</button>
+      </div>
+
+      <!-- Add Record -->
+      <div class="flex-item">
+        <h2>Add Maintenance Record</h2>
+        <input type="text" id="recordVin" placeholder="Vehicle VIN">
+        <input type="text" id="description" placeholder="Description">
+        <input type="date" id="date">
+        <input type="text" id="mechanic" placeholder="Mechanic">
+        <input type="number" id="cost" placeholder="Cost">
+        <button onclick="addMaintenanceRecord()">Submit</button>
+      </div>
+
+      <!-- Get Records -->
+      <div class="flex-item">
+        <h2>Get Records</h2>
+        <input type="text" id="searchVin" placeholder="Vehicle VIN">
+        <button onclick="getRecords()">Submit</button>
+      </div>
+
+      <!-- Get Owner -->
+      <div class="flex-item">
+        <h2>Get Vehicle Owner</h2>
+        <input type="text" id="ownerVin" placeholder="Vehicle VIN">
+        <button onclick="getOwner()">Submit</button>
+      </div>
+
+      <!-- Get Reconciliation -->
+      <div class="flex-item">
+        <h2>Get Reconciliation</h2>
+        <input type="text" id="reconciliationVin" placeholder="Vehicle VIN">
+        <button onclick="getReconciliation()">Submit</button>
+      </div>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
