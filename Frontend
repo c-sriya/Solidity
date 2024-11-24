@@ -1,0 +1,214 @@
+const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
+
+const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "date",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "mechanic",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "addRecord",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "owner",
+				"type": "string"
+			}
+		],
+		"name": "addVehicle",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "date",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "mechanic",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "RecordAdded",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			}
+		],
+		"name": "getReconciliation",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalCost",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			}
+		],
+		"name": "getRecords",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "date",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "mechanic",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "cost",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct VehicleMaintenance.Maintenance[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "vin",
+				"type": "string"
+			}
+		],
+		"name": "getVehicleOwner",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+const contractAddress = '0x9a2E12340354d2532b4247da3704D2A5d73Bd189'; 
+const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+document.getElementById('addVehicle').onsubmit = async (e) => {
+    e.preventDefault();
+    const accounts = await web3.eth.requestAccounts();
+    const vin = document.getElementById('vin').value;
+    const owner = document.getElementById('owner').value;
+    await contract.methods.addVehicle(vin, owner).send({ from: accounts[0] });
+    alert('Vehicle added successfully');
+};
+
+document.getElementById('addRecord').onsubmit = async (e) => {
+    e.preventDefault();
+    const accounts = await web3.eth.requestAccounts();
+    const vin = document.getElementById('recordVin').value;
+    const description = document.getElementById('description').value;
+    const date = new Date(document.getElementById('date').value).getTime();
+    const mechanic = document.getElementById('mechanic').value;
+    const cost = parseFloat(document.getElementById('cost').value); // Make sure the input value is a float
+    await contract.methods.addRecord(vin, description, date, mechanic, cost).send({ from: accounts[0] });
+    alert('Record added successfully');
+};
+
+document.getElementById('getRecords').onsubmit = async (e) => {
+    e.preventDefault();
+    const vin = document.getElementById('getVin').value;
+    const records = await contract.methods.getRecords(vin).call();
+    document.getElementById('records').innerText = JSON.stringify(records, null, 2);
+};
+
+document.getElementById('getOwner').onsubmit = async (e) => {
+    e.preventDefault();
+    const vin = document.getElementById('ownerVin').value;
+    const owner = await contract.methods.getVehicleOwner(vin).call();
+    document.getElementById('ownerInfo').innerText = Owner: ${owner};
+};
+
+document.getElementById('getReconciliation').onsubmit = async (e) => {
+    e.preventDefault();
+    const vin = document.getElementById('reconciliationVin').value;
+   
+}
